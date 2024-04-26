@@ -1,107 +1,118 @@
 package com.example;
 
-import static org.junit.Assert.*;
 
+import java.io.FileInputStream;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.interactions.Actions;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+// 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-public class AppTest {
-
+public class AppTest 
+{
+    public static Logger log = LogManager.getLogger(AppTest.class);
     WebDriver driver;
+    ExtentReports report;
+    ExtentTest test;
 
     @BeforeMethod
-    public void BeforeMethod() throws Exception {
+    public void mybfre() throws Exception
+    {
+        driver=new ChromeDriver();
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.get("http://dbankdemo.com/bank/login");
-        driver.manage().window().maximize();
-        Thread.sleep(3000);
+        ExtentSparkReporter r = new ExtentSparkReporter("D:\\CC2report.html");
+        report = new ExtentReports();
+        report.attachReporter(r);
+
+        log.info("URL is being opened!!!");
+        driver.get("https://www.barnesandnoble.com/");
+        log.info("Successfully opened!");
+         PropertyConfigurator.configure("C:\\Users\\Sneha D\\Downloads\\Testing\\demo\\src\\resources\\log4j.properties");
+
+    }
+    
+    @Test(priority = 0)
+    public void Test1() throws Exception
+    {
+        FileInputStream fs = new FileInputStream("D:\\Login.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(fs);
+        XSSFSheet sheet = workbook.getSheet("Login");
+        XSSFRow row = sheet.getRow(1);
+        String name = row.getCell(0).getStringCellValue(); 
+        driver.findElement(By.xpath("//*[@id=\'rhf_header_element\']/nav/div/div[3]/form/div/div[1]/a")).click();
+        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/div[1]/div/a[2]")).click();
+        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/div[2]/div/input[1]")).sendKeys(name);
+        // test.log(Status.PASS,"passed");
+        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/span/button")).click();
+        WebElement check1=driver.findElement(By.xpath("//*[@id='searchGrid']/div/section[1]/section[1]/div/div[1]/div[1]/h1"));
+        // Assert.assertTrue(check1.getText().contains("chetan bhagat"), "Name not found!");
+
+        log.info("TestCase 1 passed Successfully!");
     }
 
-    @Test(dataProvider = "dat")
-    public void test1(String name, String pass) throws Exception {
-        driver.findElement(By.id("username")).sendKeys(name);
-        Thread.sleep(3000);
-        driver.findElement(By.id("password")).sendKeys(pass);
-        Thread.sleep(3000);
-        driver.findElement(By.id("submit")).click();
-        Thread.sleep(3000);
-        String cur = driver.getCurrentUrl();
-        String home = "http://dbankdemo.com/bank/home";
+
+    @Test(priority = 1)
+    public void Test2() throws InterruptedException {
+        WebElement audiobooks = driver.findElement(By.linkText("Audiobooks"));
         Thread.sleep(2000);
-        assertEquals(cur, home);
+        Actions action = new Actions(driver);
+        action.moveToElement(audiobooks).perform();
+        driver.findElement(By.xpath("//*[@id='navbarSupportedContent']/div/ul/li[5]/div/div/div[1]/div/div[2]/div[1]/dd/a[1]")).click();
+        Thread.sleep(2000);
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,300)");
+        driver.findElement(By.linkText("Funny Story")).click();
+        Thread.sleep(2000);
+        js.executeScript("window.scrollBy(0,500)");
+        driver.findElement(By.xpath("//*[@id='otherAvailFormats']/div/div")).click();
+        Thread.sleep(2000);
+        js.executeScript("window.scrollBy(0,600)");
+         driver.findElement(By.xpath("//*[@id='prodInfoContainer']/div[3]/form[1]/input[11]")).click();
+       
+        Thread.sleep(2000);
     }
 
-    @Test(dataProvider = "dat")
-    public void test2(String name, String pass) throws Exception {
-        driver.findElement(By.id("username")).sendKeys(name);
-        Thread.sleep(3000);
-        driver.findElement(By.id("password")).sendKeys(pass);
-        Thread.sleep(3000);
-        driver.findElement(By.id("submit")).click();
-        Thread.sleep(3000);
-        driver.findElement(By.linkText("Deposit")).click();
-        Thread.sleep(3000);
-        Select S = new Select(driver.findElement(By.id("selectedAccount")));
-        S.selectByIndex(1);
-        Thread.sleep(3000);
-        driver.findElement(By.id("amount")).sendKeys("5000");
-        Thread.sleep(3000);
-        driver.findElement(By.xpath("//*[@id=\"right-panel\"]/div[2]/div/div/div/div/form/div[2]/button[1]")).click();
-        Thread.sleep(3000);
-        JavascriptExecutor JS = (JavascriptExecutor) driver;
-        JS.executeScript("window.scrollTo(0,2000)", "");
-        Thread.sleep(3000);
-        String amount = driver.findElement(By.xpath("//*[@id='transactionTable']/tbody/tr[1]/td[4]")).getText();
-        Thread.sleep(3000);
-        assertEquals(amount, "$5000.00");
+
+    @Test(priority = 2)
+    public void Test3() throws Exception{
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollBy(0,1100)");
+        Thread.sleep(2000);
+        driver.findElement(By.xpath("//*[@id='footer']/div/dd/div/div/div[1]/div/a[5]/span")).click();
+        Thread.sleep(2000);
+        js.executeScript("windows.scrollBy(0,400)");
+        driver.findElement(By.xpath("//*[@id='rewards-modal-link']")).click();
+        WebElement check2=driver.findElement(By.xpath("//*[@id=\"dialog-title\"]"));
+        Assert.assertTrue(check2.getText().contains("Sign in or Create an Account"), "Sign in first!!");
+        log.info("TestCase 3 passed Successfully!");
     }
 
-    @Test(dataProvider = "dat")
-    public void test3(String name, String pass) throws Exception {
-        driver.findElement(By.id("username")).sendKeys(name);
-        Thread.sleep(3000);
-        driver.findElement(By.id("password")).sendKeys(pass);
-        Thread.sleep(3000);
-        driver.findElement(By.id("submit")).click();
-        Thread.sleep(3000);
-        driver.findElement(By.linkText("Withdraw")).click();
-        Thread.sleep(3000);
-        Select S = new Select(driver.findElement(By.id("selectedAccount")));
-        S.selectByIndex(1);
-        Thread.sleep(3000);
-        driver.findElement(By.id("amount")).sendKeys("3000");
-        Thread.sleep(3000);
-        driver.findElement(By.xpath("//*[@id='right-panel']/div[2]/div/div/div/div/form/div[2]/button[1]")).click();
-        Thread.sleep(3000);
-        JavascriptExecutor JS = (JavascriptExecutor) driver;
-        JS.executeScript("window.scrollTo(0,2000)", "");
-        Thread.sleep(3000);
-        String amount = driver.findElement(By.xpath("//*[@id=\"transactionTable\"]/tbody/tr[1]/td[4]")).getText();
-        Thread.sleep(3000);
-        assertEquals(amount, "$-3000.00");
-    }
-
-    @DataProvider(name = "dat")
-    public String[][] datas() {
-        String a[][] = new String[1][2];
-        a[0][0] = "S@gmail.com";
-        a[0][1] = "P@ssword12";
-        return a;
-    }
 
     @AfterMethod
-    public void AfterMethod() {
+    public void myaftrmthd() throws Exception{
+        log.info("Tests Executed!!!");
+        report.flush();
+
         driver.quit();
     }
-
 }
