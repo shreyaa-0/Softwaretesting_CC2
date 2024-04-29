@@ -1,11 +1,9 @@
 package com.example;
 
-
+import java.io.File;
 import java.io.FileInputStream;
 
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -15,104 +13,126 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
-
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-// 
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 
-public class AppTest 
-{
-    public static Logger log = LogManager.getLogger(AppTest.class);
-    WebDriver driver;
-    ExtentReports report;
-    ExtentTest test;
+public class AppTest {
+static Logger log = Logger.getLogger(AppTest.class);
 
-    @BeforeMethod
-    public void mybfre() throws Exception
-    {
-        driver=new ChromeDriver();
-        WebDriverManager.chromedriver().setup();
-        ExtentSparkReporter r = new ExtentSparkReporter("D:\\CC2report.html");
-        report = new ExtentReports();
-        report.attachReporter(r);
+@BeforeMethod
+public void before() {
+WebDriverManager.chromedriver().setup();
+System.out.println("Test case Started Successfully");
+}
 
-        log.info("URL is being opened!!!");
-        driver.get("https://www.barnesandnoble.com/");
-        log.info("Successfully opened!");
-         PropertyConfigurator.configure("C:\\Users\\Sneha D\\Downloads\\Testing\\demo\\src\\resources\\log4j.properties");
+@Test(priority = 0)
+public void testing1() throws Exception {
+ExtentReports report = new ExtentReports();
+ExtentSparkReporter eReporter = new ExtentSparkReporter(
+"C:\\Users\\Administrator\\Desktop\\demost2\\src\\test\\java\\com\\example\\report\\ExtentReport.html");
+report.attachReporter(eReporter);
+ExtentTest test = report.createTest("Test One1");
+WebDriverManager.chromedriver().setup();
+WebDriver driver = new ChromeDriver();
+driver.get("https://www.barnesandnoble.com/");
+driver.manage().window().maximize();
+driver.findElement(By.xpath("/html/body/div[2]/header/nav/div/div[3]/form/div/div[1]")).click();
+Thread.sleep(2000);
+driver.findElement(By.xpath("/html/body/div[2]/header/nav/div/div[3]/form/div/div[1]/div/a[2]")).click();
+Thread.sleep(2000);
 
-    }
-    
-    @Test(priority = 0)
-    public void Test1() throws Exception
-    {
-        FileInputStream fs = new FileInputStream("D:\\Login.xlsx");
-        XSSFWorkbook workbook = new XSSFWorkbook(fs);
-        XSSFSheet sheet = workbook.getSheet("Login");
-        XSSFRow row = sheet.getRow(1);
-        String name = row.getCell(0).getStringCellValue(); 
-        driver.findElement(By.xpath("//*[@id=\'rhf_header_element\']/nav/div/div[3]/form/div/div[1]/a")).click();
-        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/div[1]/div/a[2]")).click();
-        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/div[2]/div/input[1]")).sendKeys(name);
-        // test.log(Status.PASS,"passed");
-        driver.findElement(By.xpath("//*[@id='rhf_header_element']/nav/div/div[3]/form/div/span/button")).click();
-        WebElement check1=driver.findElement(By.xpath("//*[@id='searchGrid']/div/section[1]/section[1]/div/div[1]/div[1]/h1"));
-        // Assert.assertTrue(check1.getText().contains("chetan bhagat"), "Name not found!");
+File file = new File("C:\\dbankdemo.xlsx");
+FileInputStream fis = new FileInputStream(file);
+XSSFWorkbook wb = new XSSFWorkbook(fis);
+XSSFSheet sh = wb.getSheet("Sheet1");
+XSSFRow r = sh.getRow(2);
+String x = r.getCell(0).getStringCellValue();
+driver.findElement(By.xpath("/html/body/div[2]/header/nav/div/div[3]/form/div/div[2]/div/input[1]"))
+.sendKeys(x);
+Thread.sleep(2000);
+driver.findElement(By.xpath("/html/body/div[2]/header/nav/div/div[3]/form/div/span")).click();
+Thread.sleep(2000);
+WebElement page = driver
+.findElement(By.xpath("//*[@id='searchGrid']/div/section[1]/section[1]/div/div[1]/div[1]/h1/span"));
+String source = page.getText();
+if (source.equals("Chetan Bhagat")) {
+test.log(Status.PASS, "Test is present");
+System.out.print("Name found");
+} else {
+System.out.print("Name not found");
+test.log(Status.FAIL, "Test is not present");
+}
+report.flush();
+driver.quit();
+}
 
-        log.info("TestCase 1 passed Successfully!");
-    }
+@Test(priority = 1)
+public void testing2() throws Exception {
+WebDriverManager.chromedriver().setup();
+WebDriver driver = new ChromeDriver();
+driver.get("https://www.barnesandnoble.com/");
+driver.manage().window().maximize();
+WebElement clickable =
+driver.findElement(By.xpath("/html/body/div[2]/header/nav/div/div[4]/div/ul/li[5]/a"));
+Thread.sleep(2000);
 
+new Actions(driver)
+.clickAndHold(clickable)
+.perform();
+driver.findElement(By.linkText("Audiobooks Top 100")).click();
+Thread.sleep(2000);
+driver.findElement(By.xpath(
+"/html/body/main/div[2]/div[1]/div/div[2]/div/div[2]/section[2]/ol/li[1]/div/div[2]/div[1]/h3/a"))
+.click();
+Thread.sleep(2000);
 
-    @Test(priority = 1)
-    public void Test2() throws InterruptedException {
-        WebElement audiobooks = driver.findElement(By.linkText("Audiobooks"));
-        Thread.sleep(2000);
-        Actions action = new Actions(driver);
-        action.moveToElement(audiobooks).perform();
-        driver.findElement(By.xpath("//*[@id='navbarSupportedContent']/div/ul/li[5]/div/div/div[1]/div/div[2]/div[1]/dd/a[1]")).click();
-        Thread.sleep(2000);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("window.scrollBy(0,300)");
-        driver.findElement(By.linkText("Funny Story")).click();
-        Thread.sleep(2000);
-        js.executeScript("window.scrollBy(0,500)");
-        driver.findElement(By.xpath("//*[@id='otherAvailFormats']/div/div")).click();
-        Thread.sleep(2000);
-        js.executeScript("window.scrollBy(0,600)");
-         driver.findElement(By.xpath("//*[@id='prodInfoContainer']/div[3]/form[1]/input[11]")).click();
-       
-        Thread.sleep(2000);
-    }
+JavascriptExecutor js10 = (JavascriptExecutor) driver;
+js10.executeScript("window.scrollBy(0,400)");
+Thread.sleep(2000);
+driver.findElement(
+By.xpath("/html/body/main/div[2]/div[2]/section/div[2]/div/div[3]/div[2]/ul/li[2]/div/div/label/span"))
+.click();
+Thread.sleep(2000);
+driver.findElement(By.xpath(
+"/html/body/main/div[2]/div[2]/section/div[2]/div/div[3]/div[2]/div[3]/div[1]/div[1]/form/input[5]"))
+.click();
+Thread.sleep(2000);
 
+driver.quit();
+}
 
-    @Test(priority = 2)
-    public void Test3() throws Exception{
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("window.scrollBy(0,1100)");
-        Thread.sleep(2000);
-        driver.findElement(By.xpath("//*[@id='footer']/div/dd/div/div/div[1]/div/a[5]/span")).click();
-        Thread.sleep(2000);
-        js.executeScript("windows.scrollBy(0,400)");
-        driver.findElement(By.xpath("//*[@id='rewards-modal-link']")).click();
-        WebElement check2=driver.findElement(By.xpath("//*[@id=\"dialog-title\"]"));
-        Assert.assertTrue(check2.getText().contains("Sign in or Create an Account"), "Sign in first!!");
-        log.info("TestCase 3 passed Successfully!");
-    }
+@Test(priority = 2)
+public void testing3() throws Exception {
 
+WebDriverManager.chromedriver().setup();
+WebDriver driver = new ChromeDriver();
+driver.manage().window().maximize();
 
-    @AfterMethod
-    public void myaftrmthd() throws Exception{
-        log.info("Tests Executed!!!");
-        report.flush();
+driver.get("https://www.barnesandnoble.com/");
+Thread.sleep(2000);
 
-        driver.quit();
-    }
+driver.navigate().to("https://www.barnesandnoble.com/membership/");
+JavascriptExecutor js1 = (JavascriptExecutor) driver;
+js1.executeScript("window.scrollBy(0,2000)");
+Thread.sleep(2000);
+driver.findElement(By.xpath("/html/body/main/section/div[1]/div[2]/div/div/div[2]/div/div[73]/div/div[1]/a"))
+.click();
+Thread.sleep(2000);
+
+driver.quit();
+}
+
+@AfterMethod
+public void after() {
+System.out.println("Test Case Runned Successfully");
+}
+
 }
